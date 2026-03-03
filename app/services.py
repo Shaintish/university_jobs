@@ -19,8 +19,8 @@ class JobService:
         if search:
             return [v for v in vacancies_db if search.lower() in v.title.lower()]
         return vacancies_db
-    
-     @staticmethod
+
+    @staticmethod
     def get_vacancy(vacancy_id: int) -> Vacancy:
         for v in vacancies_db:
             if v.id == vacancy_id:
@@ -41,7 +41,7 @@ class JobService:
         )
         applications_db.append(application)
         return application
-    
+
     @staticmethod
     def get_application(app_id: int) -> Application:
         application = next((a for a in applications_db if a.id == app_id), None)
