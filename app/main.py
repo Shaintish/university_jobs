@@ -5,9 +5,7 @@ from .services import JobService, vacancies_db, applications_db
 
 app = FastAPI(title="University Career Hub")
 
-
 # Эндпоинты для Вакансий
-
 @app.post("/vacancies", response_model=Vacancy, status_code=201)
 async def create_vacancy(vacancy: VacancyCreate):
     return JobService.create_vacancy(vacancy)
@@ -35,9 +33,7 @@ async def get_all_applications_debug():
 async def get_vacancy(vacancy_id: int):
     return JobService.get_vacancy(vacancy_id)
 
-
 # Эндпоинты заявок
-
 @app.post("/applications", response_model=Application, status_code=201)
 async def apply_for_job(application: ApplicationCreate):
     return JobService.create_application(application)
