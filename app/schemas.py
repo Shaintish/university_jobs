@@ -17,3 +17,18 @@ class VacancyBase(BaseModel):
     department: str
     job_type: JobType
     salary: Optional[int] = None
+    
+class VacancyCreate(VacancyBase):
+    pass
+
+class Vacancy(VacancyBase):
+    id: int
+
+class ApplicationCreate(BaseModel):
+    vacancy_id: int
+    student_name: str
+    student_email: EmailStr
+
+class Application(ApplicationCreate):
+    id: int
+    status: ApplicationStatus
