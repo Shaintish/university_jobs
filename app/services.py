@@ -41,3 +41,10 @@ class JobService:
         )
         applications_db.append(application)
         return application
+    
+    @staticmethod
+    def get_application(app_id: int) -> Application:
+        application = next((a for a in applications_db if a.id == app_id), None)
+        if not application:
+            raise HTTPException(status_code=404, detail="Заявка не найдена")
+        return application
