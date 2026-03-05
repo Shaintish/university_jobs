@@ -2,8 +2,14 @@
 
 API для центра карьеры университета.
 
-## 🚀 Быстрый старт
-
-1. **Установка зависимостей:**
+##1. **зависимости установить
 ```bash
 pip install -r requirements.txt
+
+##2. **запустить сам сервис**
+```bash
+uvicorn app.main:app --reload
+
+##3.**запуск теста
+```bash
+python -m pytest tests/test_main.py
