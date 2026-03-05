@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="vacancies-grid">
+    {% if vacancies %}
+        {% for vacancy in vacancies %}
+        <div class="vacancy-card">
+            <h3>{{ vacancy.title }}</h3>
+            <p>{{ vacancy.description[:100] }}{% if vacancy.description|length > 100 %}...{% endif %}</p>
+            <p><strong>Отдел:</strong> {{ vacancy.department }}</p>
+            <span class="badge {{ vacancy.job_type }}">{{ vacancy.job_type }}</span>
+            {% if vacancy.salary %}
+            <p><strong>💰 {{ vacancy.salary }} $</strong></p>
+            {% endif %}
+            <a href="/apply/{{ vacancy.id }}" class="btn">📝 Подать заявку</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align: center; color: white; font-size: 1.2em;">Пока нет вакансий</p>
+    {% endif %}
+</div>
+{% endblock %}
