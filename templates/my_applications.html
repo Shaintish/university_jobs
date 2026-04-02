@@ -1,29 +1,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div style="background: white; padding: 30px; border-radius: 10px; max-width: 500px; margin: 0 auto;">
-    <h2>🔐 Вход в систему</h2>
-    
-    {% if error %}
-    <div class="alert error">{{ error }}</div>
+<div style="background: white; padding: 30px; border-radius: 10px;">
+    <h2>📋 Мои отклики</h2>
+
+    {% if applications %}
+        <div class="vacancies-grid">
+            {% for app in applications %}
+            <div class="vacancy-card">
+                <h3>Вакансия #{{ app.vacancy_id }}</h3>
+                <p><strong>Имя:</strong> {{ app.student_name }}</p>
+                <p><strong>Email:</strong> {{ app.student_email }}</p>
+                <p>
+                    <strong>Статус:</strong>
+                    <span class="badge 
+                        {% if app.status == 'pending' %}job
+                        {% elif app.status == 'accepted' %}internship
+                        {% else %}job{% endif %}">
+                        {% if app.status == 'pending' %}⏳ На рассмотрении
+                        {% elif app.status == 'accepted' %}✅ Принята
+                        {% else %}❌ Отклонена{% endif %}
+                    </span>
+                </p>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p style="text-align: center; padding: 50px; font-size: 1.2em; color: #666;">
+            📭 У вас пока нет откликов
+        </p>
     {% endif %}
-    
-    <form method="post">
-        <div class="form-group">
-            <label>Имя пользователя</label>
-            <input type="text" name="username" required>
-        </div>
-        
-        <div class="form-group">
-            <label>Пароль</label>
-            <input type="password" name="password" required>
-        </div>
-        
-        <button type="submit" class="btn">Войти</button>
-    </form>
-    
-    <p style="margin-top: 20px; text-align: center;">
-        Нет аккаунта? <a href="/register">Зарегистрироваться</a>
-    </p>
 </div>
 {% endblock %}
