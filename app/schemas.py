@@ -17,7 +17,7 @@ class VacancyBase(BaseModel):
     department: str
     job_type: JobType
     salary: Optional[int] = None
-    
+
 class VacancyCreate(VacancyBase):
     pass
 
@@ -32,3 +32,18 @@ class ApplicationCreate(BaseModel):
 class Application(ApplicationCreate):
     id: int
     status: ApplicationStatus
+
+# НОВЫЕ МОДЕЛИ ДЛЯ ПОЛЬЗОВАТЕЛЕЙ
+class UserCreate(BaseModel):
+    username: str
+    email: EmailStr
+    password: str
+
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class User(BaseModel):
+    id: int
+    username: str
+    email: EmailStr
