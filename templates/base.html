@@ -141,8 +141,18 @@
         <header>
             <h1>🎓 Центр карьеры университета</h1>
             <nav>
-                <a href="/">Главная</a>
-                <a href="/add-vacancy">➕ Добавить вакансию</a>
+                <nav>
+                    <a href="/">🏠 Вакансии</a>
+                    <a href="/my-applications">📋 Мои отклики</a>
+                    <a href="/add-vacancy">➕ Добавить вакансию</a>
+                    {% if user %}
+                        <span style="margin-left: auto;">👋 {{ user.username }}</span>
+                        <a href="/logout">🚪 Выйти</a>
+                    {% else %}
+                         <a href="/login" style="margin-left: auto;">🔐 Войти</a>
+                         <a href="/register">📝 Регистрация</a>
+    {% endif %}
+</nav>
             </nav>
         </header>
         
