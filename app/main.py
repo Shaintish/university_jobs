@@ -241,3 +241,161 @@ async def employer_login(
             "employer_login.html",
             {"request": request, "error": "Неверный логин или пароль"}
         )
+    # ========== АДМИН-ПАНЕЛЬ РАБОТОДАТЕЛЯ ==========
+
+@app.get("/admin/applications", response_class=HTMLResponse)
+async def admin_applications(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/employer/login", status_code=303)
+    
+    current_user = sessions[session_id]
+    if current_user.get("role") != "employer":
+        return RedirectResponse(url="/", status_code=303)
+    
+    all_applications = JobService.get_all_applications()
+    return templates.TemplateResponse(
+        "admin_applications.html",
+        {"request": request, "applications": all_applications, "user": current_user}
+    )
+
+
+@app.post("/admin/applications")
+async def admin_update_application(
+    request: Request,
+    app_id: int = Form(...),
+    action: str = Form(...)
+):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/employer/login", status_code=303)
+    
+    current_user = sessions[session_id]
+    if current_user.get("role") != "employer":
+        return RedirectResponse(url="/", status_code=303)
+    
+    if action == "accept":
+        JobService.update_application_status(app_id, "accepted")
+        message = f"✅ Заявка #{app_id} принята!"
+        
+        # Создаем чат для принятой заявки
+        application = JobService.get_application(app_id)
+        if application:
+            vacancy = JobService.get_vacancy(application.vacancy_id)
+            JobService.create_chat(
+                application_id=app_id,
+                student_email=application.student_email,
+                student_name=application.student_name,
+                vacancy_id=application.vacancy_id,
+                vacancy_title=vacancy.title if vacancy else f"Вакансия #{application.vacancy_id}"
+            )
+    elif action == "reject":
+        JobService.update_application_status(app_id, "rejected")
+        message = f"❌ Заявка #{app_id} отклонена!"
+    else:
+        message = "Неизвестное действие"
+    
+    all_applications = JobService.get_all_applications()
+    return templates.TemplateResponse(
+        "admin_applications.html",
+        {"request": request, "applications": all_applications, "user": current_user, "message": message}
+    )
+# ========== ЧАТ ==========
+
+@app.get("/chat/{application_id}", response_class=HTMLResponse)
+async def chat_page(request: Request, application_id: int):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/login", status_code=303)
+    
+    current_user = sessions[session_id]
+    
+    application = JobService.get_application(application_id)
+    if not application:
+        return RedirectResponse(url="/", status_code=303)
+    
+    is_student = (application.student_email == current_user.get("email"))
+    is_employer = (current_user.get("role") == "employer")
+    
+    if not (is_student or is_employer):
+        return RedirectResponse(url="/", status_code=303)
+    
+    chat = JobService.get_chat_by_application(application_id)
+    if not chat:
+        vacancy = JobService.get_vacancy(application.vacancy_id)
+        chat = JobService.create_chat(
+            application_id=application_id,
+            student_email=application.student_email,
+            student_name=application.student_name,
+            vacancy_id=application.vacancy_id,
+            vacancy_title=vacancy.title if vacancy else f"Вакансия #{application.vacancy_id}"
+        )
+    
+    messages = JobService.get_messages_by_application(application_id)
+    
+    return templates.TemplateResponse(
+        "chat.html",
+        {
+            "request": request,
+            "application_id": application_id,
+            "chat": chat,
+            "messages": messages,
+            "user": current_user,
+            "is_student": is_student,
+            "is_employer": is_employer
+        }
+    )
+
+
+@app.post("/chat/{application_id}/send")
+async def send_message(
+    request: Request,
+    application_id: int,
+    message: str = Form(...)
+):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/login", status_code=303)
+    
+    current_user = sessions[session_id]
+    
+    application = JobService.get_application(application_id)
+    if not application:
+        return RedirectResponse(url="/", status_code=303)
+    
+    is_student = (application.student_email == current_user.get("email"))
+    is_employer = (current_user.get("role") == "employer")
+    
+    if not (is_student or is_employer):
+        return RedirectResponse(url="/", status_code=303)
+    
+    sender = "student" if is_student else "employer"
+    sender_name = current_user.get("username")
+    
+    JobService.add_message(application_id, sender, sender_name, message)
+    
+    return RedirectResponse(url=f"/chat/{application_id}", status_code=303)
+
+
+@app.get("/my-chats", response_class=HTMLResponse)
+async def my_chats(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/login", status_code=303)
+    
+    current_user = sessions[session_id]
+    
+    if current_user.get("role") == "employer":
+        all_chats = JobService.get_all_chats()
+        active_chats = []
+        for chat in all_chats:
+            app = JobService.get_application(chat["application_id"])
+            if app and app.status == "accepted":
+                active_chats.append(chat)
+    else:
+        active_chats = JobService.get_chats_by_student_email(current_user.get("email"))
+    
+    return templates.TemplateResponse(
+        "my_chats.html",
+        {"request": request, "chats": active_chats, "user": current_user}
+    )
