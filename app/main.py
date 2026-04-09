@@ -211,3 +211,33 @@ async def create_application_api(application: ApplicationCreate):
 @app.get("/applications/{app_id}", response_model=Application)
 async def get_application_api(app_id: int):
     return JobService.get_application(app_id)
+# ========== ВХОД ДЛЯ РАБОТОДАТЕЛЯ ==========
+
+@app.get("/employer/login", response_class=HTMLResponse)
+async def employer_login_form(request: Request):
+    return templates.TemplateResponse("employer_login.html", {"request": request})
+
+@app.post("/employer/login")
+async def employer_login(
+    request: Request,
+    username: str = Form(...),
+    password: str = Form(...)
+):
+    # Проверка для работодателя
+    if username == "employer" and password == "admin123":
+        session_id = str(uuid.uuid4())
+        employer_user = {
+            "id": 999, 
+            "username": "employer", 
+            "email": "employer@company.com", 
+            "role": "employer"
+        }
+        sessions[session_id] = employer_user
+        response = RedirectResponse(url="/admin/applications", status_code=303)
+        response.set_cookie(key="session_id", value=session_id)
+        return response
+    else:
+        return templates.TemplateResponse(
+            "employer_login.html",
+            {"request": request, "error": "Неверный логин или пароль"}
+        )
