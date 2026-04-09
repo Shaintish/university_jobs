@@ -16,7 +16,6 @@ sessions = {}
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    # Проверяем, авторизован ли пользователь
     session_id = request.cookies.get("session_id")
     current_user = None
     if session_id and session_id in sessions:
@@ -41,7 +40,6 @@ async def register(
 ):
     try:
         user = UserService.register(UserCreate(username=username, email=email, password=password))
-        # Автоматически входим после регистрации
         session_id = str(uuid.uuid4())
         sessions[session_id] = user
         response = RedirectResponse(url="/", status_code=303)
@@ -89,7 +87,6 @@ async def my_applications(request: Request):
         return RedirectResponse(url="/login", status_code=303)
     
     current_user = sessions[session_id]
-    # Получаем заявки по email пользователя
     user_applications = JobService.get_applications_by_email(current_user.email)
     
     return templates.TemplateResponse(
@@ -179,7 +176,7 @@ async def submit_application(
             }
         )
 
-# ========== API ЭНДПОИНТЫ (оставляем для совместимости) ==========
+# ========== API ЭНДПОИНТЫ ==========
 
 @app.post("/vacancies", response_model=Vacancy, status_code=200)
 async def create_vacancy_api(vacancy: VacancyCreate):
@@ -211,6 +208,7 @@ async def create_application_api(application: ApplicationCreate):
 @app.get("/applications/{app_id}", response_model=Application)
 async def get_application_api(app_id: int):
     return JobService.get_application(app_id)
+
 # ========== ВХОД ДЛЯ РАБОТОДАТЕЛЯ ==========
 
 @app.get("/employer/login", response_class=HTMLResponse)
@@ -223,7 +221,6 @@ async def employer_login(
     username: str = Form(...),
     password: str = Form(...)
 ):
-    # Проверка для работодателя
     if username == "employer" and password == "admin123":
         session_id = str(uuid.uuid4())
         employer_user = {
@@ -241,7 +238,8 @@ async def employer_login(
             "employer_login.html",
             {"request": request, "error": "Неверный логин или пароль"}
         )
-    # ========== АДМИН-ПАНЕЛЬ РАБОТОДАТЕЛЯ ==========
+
+# ========== АДМИН-ПАНЕЛЬ РАБОТОДАТЕЛЯ ==========
 
 @app.get("/admin/applications", response_class=HTMLResponse)
 async def admin_applications(request: Request):
@@ -258,7 +256,6 @@ async def admin_applications(request: Request):
         "admin_applications.html",
         {"request": request, "applications": all_applications, "user": current_user}
     )
-
 
 @app.post("/admin/applications")
 async def admin_update_application(
@@ -278,7 +275,6 @@ async def admin_update_application(
         JobService.update_application_status(app_id, "accepted")
         message = f"✅ Заявка #{app_id} принята!"
         
-        # Создаем чат для принятой заявки
         application = JobService.get_application(app_id)
         if application:
             vacancy = JobService.get_vacancy(application.vacancy_id)
@@ -300,6 +296,7 @@ async def admin_update_application(
         "admin_applications.html",
         {"request": request, "applications": all_applications, "user": current_user, "message": message}
     )
+
 # ========== ЧАТ ==========
 
 @app.get("/chat/{application_id}", response_class=HTMLResponse)
@@ -346,7 +343,6 @@ async def chat_page(request: Request, application_id: int):
         }
     )
 
-
 @app.post("/chat/{application_id}/send")
 async def send_message(
     request: Request,
@@ -376,29 +372,6 @@ async def send_message(
     
     return RedirectResponse(url=f"/chat/{application_id}", status_code=303)
 
-
-@app.get("/my-chats", response_class=HTMLResponse)
-async def my_chats(request: Request):
-    session_id = request.cookies.get("session_id")
-    if not session_id or session_id not in sessions:
-        return RedirectResponse(url="/login", status_code=303)
-    
-    current_user = sessions[session_id]
-    
-    if current_user.get("role") == "employer":
-        all_chats = JobService.get_all_chats()
-        active_chats = []
-        for chat in all_chats:
-            app = JobService.get_application(chat["application_id"])
-            if app and app.status == "accepted":
-                active_chats.append(chat)
-    else:
-        active_chats = JobService.get_chats_by_student_email(current_user.get("email"))
-    
-    return templates.TemplateResponse(
-        "my_chats.html",
-        {"request": request, "chats": active_chats, "user": current_user}
-    )
 @app.get("/my-chats", response_class=HTMLResponse)
 async def my_chats(request: Request):
     session_id = request.cookies.get("session_id")
