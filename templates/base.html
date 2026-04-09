@@ -1,162 +1,619 @@
 <!DOCTYPE html>
-<html>
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎓 Центр карьеры</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🎓 CareerHub - Центр карьеры университета</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
+
         body {
+            font-family: 'Inter', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            padding: 20px;
+            position: relative;
         }
+
+        /* Анимированные частицы фона */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+            25% { transform: translateY(-50px) translateX(30px); opacity: 0.6; }
+            50% { transform: translateY(-100px) translateX(-20px); opacity: 0.3; }
+            75% { transform: translateY(-50px) translateX(40px); opacity: 0.5; }
+        }
+
+        /* Контейнер */
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
-        }
-        header {
-            background: white;
             padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+            z-index: 1;
         }
-        header h1 {
-            color: #333;
-            margin-bottom: 10px;
+
+        /* Header с эффектом стекла */
+        header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
         }
+
+        header:hover {
+            box-shadow: 0 25px 50px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo p {
+            color: #666;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        /* Навигация */
         nav {
             display: flex;
-            gap: 20px;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
         }
-        nav a {
+
+        .nav-link {
             text-decoration: none;
-            color: #667eea;
+            color: #333;
             font-weight: 500;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: background 0.3s;
+            padding: 10px 18px;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
-        nav a:hover {
-            background: #f0f0f0;
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: all 0.3s ease;
+            transform: translateX(-50%);
         }
+
+        .nav-link:hover::before {
+            width: 80%;
+        }
+
+        .nav-link:hover {
+            background: #f5f5f5;
+            transform: translateY(-2px);
+        }
+
+        .nav-link.employer {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: white;
+        }
+
+        .nav-link.employer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255,152,0,0.3);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background: linear-gradient(135deg, #f5f5f5, #e8e8e8);
+            padding: 8px 20px;
+            border-radius: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .user-info:hover {
+            transform: scale(1.02);
+        }
+
+        .user-info span {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+            padding: 6px 15px;
+            border-radius: 30px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(220,53,69,0.3);
+        }
+
+        /* Карточки вакансий с эффектом 3D */
         .vacancies-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
         }
+
         .vacancy-card {
             background: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            transition: transform 0.3s;
-        }
-        .vacancy-card:hover {
-            transform: translateY(-5px);
-        }
-        .vacancy-card h3 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        .vacancy-card p {
-            color: #666;
-            margin-bottom: 10px;
-            line-height: 1.5;
-        }
-        .badge {
-            display: inline-block;
-            padding: 5px 10px;
-            border-radius: 5px;
-            font-size: 0.9em;
-            margin-right: 10px;
-        }
-        .badge.job {
-            background: #e3f2fd;
-            color: #1976d2;
-        }
-        .badge.internship {
-            background: #f3e5f5;
-            color: #7b1fa2;
-        }
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background: #667eea;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            margin-top: 10px;
-            border: none;
+            border-radius: 24px;
+            padding: 28px;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
             cursor: pointer;
-            font-size: 1em;
         }
-        .btn:hover {
-            background: #5a67d8;
+
+        .vacancy-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #ff9800);
         }
-        .form-group {
+
+        .vacancy-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 25px 50px rgba(0,0,0,0.2);
+        }
+
+        .vacancy-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .vacancy-department {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.95rem;
+        }
+
+        .vacancy-description {
+            color: #666;
+            line-height: 1.6;
             margin-bottom: 20px;
         }
+
+        .vacancy-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge.job {
+            background: linear-gradient(135deg, #e3f2fd, #bbdef5);
+            color: #1976d2;
+        }
+
+        .badge.internship {
+            background: linear-gradient(135deg, #f3e5f5, #e1bee7);
+            color: #7b1fa2;
+        }
+
+        .salary {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #28a745;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* Кнопки */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102,126,234,0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #dc3545, #c82333);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #ff9800, #ff5722);
+            color: white;
+        }
+
+        /* Формы с неоновым эффектом */
+        .form-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 32px;
+            padding: 50px;
+            max-width: 550px;
+            margin: 0 auto;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-title {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 35px;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
+            font-weight: 600;
             color: #333;
-            font-weight: 500;
         }
+
         .form-group input,
         .form-group textarea,
         .form-group select {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1em;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
         }
-        .form-group textarea {
-            min-height: 100px;
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+            transform: translateY(-2px);
         }
+
+        /* Таблицы */
+        .table-container {
+            background: white;
+            border-radius: 24px;
+            padding: 25px;
+            overflow-x: auto;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Статистика */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            background: white;
+        }
+
+        .stat-number {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: #666;
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        /* Анимации */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .vacancy-card {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Адаптивность */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .vacancies-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .form-container {
+                padding: 25px;
+            }
+            
+            .form-title {
+                font-size: 1.5rem;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+        }
+
+        /* Чат */
+        .chat-container {
+            background: white;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px 25px;
+        }
+
+        .chat-messages {
+            height: 450px;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 20px;
+            position: relative;
+        }
+
+        .message.sent .message-bubble {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .message.received .message-bubble {
+            background: white;
+            color: #333;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .message-time {
+            font-size: 0.7rem;
+            margin-top: 5px;
+            opacity: 0.7;
+        }
+
+        /* Уведомления */
         .alert {
-            padding: 10px;
-            border-radius: 5px;
+            padding: 15px 20px;
+            border-radius: 16px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            animation: fadeInUp 0.3s ease;
         }
+
         .alert.success {
-            background: #d4edda;
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
             color: #155724;
+            border-left: 5px solid #28a745;
         }
+
         .alert.error {
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
             color: #721c24;
+            border-left: 5px solid #dc3545;
         }
     </style>
 </head>
 <body>
+    <div class="particles" id="particles"></div>
+    
     <div class="container">
         <header>
-            <h1>🎓 Центр карьеры университета</h1>
-            <nav>
+            <div class="header-content">
+                <div class="logo">
+                    <h1><i class="fas fa-graduation-cap"></i> CareerHub</h1>
+                    <p>Центр карьеры университета</p>
+                </div>
+                
                 <nav>
-                    <a href="/">🏠 Вакансии</a>
-                    <a href="/my-applications">📋 Мои отклики</a>
-                    <a href="/add-vacancy">➕ Добавить вакансию</a>
+                    <a href="/" class="nav-link"><i class="fas fa-home"></i> Вакансии</a>
+                    <a href="/my-applications" class="nav-link"><i class="fas fa-file-alt"></i> Мои отклики</a>
+                    <a href="/my-chats" class="nav-link"><i class="fas fa-comments"></i> Мои чаты</a>
+                    <a href="/add-vacancy" class="nav-link"><i class="fas fa-plus-circle"></i> Добавить вакансию</a>
+                    
+                    {% if user and user.role == 'employer' %}
+                        <a href="/admin/applications" class="nav-link employer"><i class="fas fa-users-cog"></i> Управление</a>
+                    {% endif %}
+                    
                     {% if user %}
-                        <span style="margin-left: auto;">👋 {{ user.username }}</span>
-                        <a href="/logout">🚪 Выйти</a>
+                        <div class="user-info">
+                            <span><i class="fas fa-user-circle"></i> {{ user.username }}</span>
+                            <a href="/logout" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                        </div>
                     {% else %}
-                         <a href="/login" style="margin-left: auto;">🔐 Войти</a>
-                         <a href="/register">📝 Регистрация</a>
-    {% endif %}
-</nav>
-            </nav>
+                        <a href="/employer/login" class="nav-link employer"><i class="fas fa-briefcase"></i> Работодатель</a>
+                        <a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Войти</a>
+                        <a href="/register" class="nav-link btn-primary" style="color: white;"><i class="fas fa-user-plus"></i> Регистрация</a>
+                    {% endif %}
+                </nav>
+            </div>
         </header>
         
         {% block content %}{% endblock %}
     </div>
+
+    <script>
+        // Создание анимированных частиц
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 30; i++) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            particle.style.width = Math.random() * 8 + 2 + 'px';
+            particle.style.height = particle.style.width;
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = 10 + Math.random() * 10 + 's';
+            particlesContainer.appendChild(particle);
+        }
+    </script>
 </body>
 </html>
