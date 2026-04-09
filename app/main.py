@@ -399,3 +399,25 @@ async def my_chats(request: Request):
         "my_chats.html",
         {"request": request, "chats": active_chats, "user": current_user}
     )
+@app.get("/my-chats", response_class=HTMLResponse)
+async def my_chats(request: Request):
+    session_id = request.cookies.get("session_id")
+    if not session_id or session_id not in sessions:
+        return RedirectResponse(url="/login", status_code=303)
+    
+    current_user = sessions[session_id]
+    
+    if current_user.get("role") == "employer":
+        all_chats = JobService.get_all_chats()
+        active_chats = []
+        for chat in all_chats:
+            app = JobService.get_application(chat["application_id"])
+            if app and app.status == "accepted":
+                active_chats.append(chat)
+    else:
+        active_chats = JobService.get_chats_by_student_email(current_user.get("email"))
+    
+    return templates.TemplateResponse(
+        "my_chats.html",
+        {"request": request, "chats": active_chats, "user": current_user}
+    )
