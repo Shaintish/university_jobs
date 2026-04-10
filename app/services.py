@@ -28,36 +28,31 @@ class JobService:
         return get_all_vacancies(search)
 
     @staticmethod
-    def create_vacancy(data: VacancyCreate):
-        vacancy_id = save_vacancy(
-        title=data.title,
-        description=data.description,
-        department=data.department,
-        job_type=data.job_type,
-        salary=data.salary,
-        employer_id=None
-    )
-        return {"id": vacancy_id, **data.model_dump()}
+    def get_vacancy(vacancy_id: int):  # ← ЭТОТ МЕТОД НУЖНО ДОБАВИТЬ
+        vacancy = get_vacancy(vacancy_id)
+        if not vacancy:
+            raise HTTPException(status_code=404, detail="Вакансия не найдена")
+        return vacancy
 
     @staticmethod
     def create_application(data: ApplicationCreate, user_id: int = None):
         vacancy = JobService.get_vacancy(data.vacancy_id)
         if not vacancy:
             raise HTTPException(status_code=404, detail="Вакансия не существует")
-    
+        
         app_id = save_application(
-        vacancy_id=data.vacancy_id,
-        student_name=data.student_name,
-        student_email=data.student_email,
-        status='pending'
-    )
+            vacancy_id=data.vacancy_id,
+            student_name=data.student_name,
+            student_email=data.student_email,
+            status='pending'
+        )
         return {
-        "id": app_id,
-        "vacancy_id": data.vacancy_id,
-        "student_name": data.student_name,
-        "student_email": data.student_email,
-        "status": "pending"
-    }
+            "id": app_id,
+            "vacancy_id": data.vacancy_id,
+            "student_name": data.student_name,
+            "student_email": data.student_email,
+            "status": "pending"
+        }
 
     @staticmethod
     def get_application(app_id: int):
@@ -105,7 +100,6 @@ class JobService:
     def get_messages_by_application(application_id: int):
         return get_messages_by_application(application_id)
 
-
 class UserService:
     @staticmethod
     def register(data: UserCreate):
@@ -127,3 +121,9 @@ class UserService:
         if user["password"] != password:
             raise HTTPException(status_code=401, detail="Неверный пароль")
         return user
+    @staticmethod
+    def get_vacancy(vacancy_id: int):
+        vacancy = get_vacancy(vacancy_id)
+        if not vacancy:
+            raise HTTPException(status_code=404, detail="Вакансия не найдена")
+        return vacancy
