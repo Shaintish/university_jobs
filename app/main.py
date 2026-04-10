@@ -301,34 +301,71 @@ async def admin_update_application(
 
 @app.get("/chat/{application_id}", response_class=HTMLResponse)
 async def chat_page(request: Request, application_id: int):
+    print(f"\n=== ОТЛАДКА ЧАТА ===")
+    print(f"Запрошен чат для заявки: {application_id}")
+    
     session_id = request.cookies.get("session_id")
+    print(f"Session ID: {session_id}")
+    print(f"Все сессии: {sessions}")
+    
     if not session_id or session_id not in sessions:
+        print("ОШИБКА: Сессия не найдена!")
         return RedirectResponse(url="/login", status_code=303)
     
     current_user = sessions[session_id]
+    print(f"Текущий пользователь: {current_user}")
     
-    application = JobService.get_application(application_id)
-    if not application:
+    # Получаем заявку
+    try:
+        application = JobService.get_application(application_id)
+        print(f"Заявка: {application}")
+    except Exception as e:
+        print(f"ОШИБКА при получении заявки: {e}")
         return RedirectResponse(url="/", status_code=303)
     
+    if not application:
+        print("ОШИБКА: Заявка не найдена!")
+        return RedirectResponse(url="/", status_code=303)
+    
+    # Проверяем права доступа
     is_student = (application.student_email == current_user.get("email"))
     is_employer = (current_user.get("role") == "employer")
+    print(f"is_student: {is_student}, is_employer: {is_employer}")
+    print(f"Email заявки: {application.student_email}")
+    print(f"Email пользователя: {current_user.get('email')}")
     
     if not (is_student or is_employer):
+        print("ОШИБКА: Нет доступа к чату!")
         return RedirectResponse(url="/", status_code=303)
     
-    chat = JobService.get_chat_by_application(application_id)
-    if not chat:
-        vacancy = JobService.get_vacancy(application.vacancy_id)
-        chat = JobService.create_chat(
-            application_id=application_id,
-            student_email=application.student_email,
-            student_name=application.student_name,
-            vacancy_id=application.vacancy_id,
-            vacancy_title=vacancy.title if vacancy else f"Вакансия #{application.vacancy_id}"
-        )
+    # Получаем или создаем чат
+    try:
+        chat = JobService.get_chat_by_application(application_id)
+        print(f"Чат из БД: {chat}")
+        
+        if not chat:
+            print("Чат не найден, создаем новый...")
+            vacancy = JobService.get_vacancy(application.vacancy_id)
+            print(f"Вакансия: {vacancy}")
+            chat = JobService.create_chat(
+                application_id=application_id,
+                student_email=application.student_email,
+                student_name=application.student_name,
+                vacancy_id=application.vacancy_id,
+                vacancy_title=vacancy.title if vacancy else f"Вакансия #{application.vacancy_id}"
+            )
+            print(f"Созданный чат: {chat}")
+        
+        messages = JobService.get_messages_by_application(application_id)
+        print(f"Сообщений: {len(messages) if messages else 0}")
+        
+    except Exception as e:
+        print(f"ОШИБКА при работе с чатом: {e}")
+        import traceback
+        traceback.print_exc()
+        return RedirectResponse(url="/", status_code=303)
     
-    messages = JobService.get_messages_by_application(application_id)
+    print("=== ОТЛАДКА ЗАВЕРШЕНА ===\n")
     
     return templates.TemplateResponse(
         "chat.html",
