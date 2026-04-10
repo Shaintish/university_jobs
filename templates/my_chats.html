@@ -2,35 +2,21 @@
 
 {% block content %}
 <div class="table-container">
-    <h2 style="margin-bottom: 20px;"><i class="fas fa-comments"></i> Мои чаты</h2>
+    <h2>💬 Мои чаты</h2>
     
     {% if chats and chats|length > 0 %}
-        <div class="vacancies-grid">
+        <div style="display: grid; gap: 20px;">
             {% for chat in chats %}
-            <div class="vacancy-card">
-                <h3><i class="fas fa-briefcase"></i> {{ chat.vacancy_title }}</h3>
+            <div style="background: white; border-radius: 15px; padding: 20px; border: 1px solid #eef2f6;">
+                <h3>{{ chat.vacancy_title }}</h3>
                 <p><strong>Студент:</strong> {{ chat.student_name }}</p>
                 <p><strong>Email:</strong> {{ chat.student_email }}</p>
-                <p><strong>Сообщений:</strong> {{ chat.messages|length }}</p>
-                <a href="/chat/{{ chat.application_id }}" class="btn btn-primary">
-                    <i class="fas fa-comments"></i> Перейти в чат
-                </a>
+                <a href="/chat/{{ chat.application_id }}" class="btn-primary" style="display: inline-block; padding: 8px 20px;">Перейти в чат</a>
             </div>
             {% endfor %}
         </div>
     {% else %}
-        <div style="text-align: center; padding: 50px;">
-            <i class="fas fa-comments" style="font-size: 4rem; color: #ccc;"></i>
-            <p style="margin-top: 20px; font-size: 1.2em; color: #666;">
-                💭 У вас пока нет активных чатов
-            </p>
-            <p style="color: #999;">
-                Чат появляется, когда работодатель принимает вашу заявку
-            </p>
-            <a href="/" class="btn btn-primary" style="margin-top: 15px;">
-                <i class="fas fa-search"></i> Найти вакансии
-            </a>
-        </div>
+        <p style="text-align: center; padding: 40px;">💭 У вас пока нет активных чатов</p>
     {% endif %}
 </div>
 {% endblock %}
