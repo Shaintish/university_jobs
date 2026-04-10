@@ -2,12 +2,10 @@
 
 {% block content %}
 <div class="table-container">
-    <h2 style="margin-bottom: 20px;"><i class="fas fa-users-cog"></i> Управление заявками</h2>
+    <h2 style="margin-bottom: 24px;">Управление заявками</h2>
     
     {% if message %}
-    <div class="alert success">
-        <i class="fas fa-check-circle"></i> {{ message }}
-    </div>
+    <div class="alert success">{{ message }}</div>
     {% endif %}
     
     {% if applications %}
@@ -15,7 +13,6 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Вакансия</th>
                 <th>Студент</th>
                 <th>Email</th>
                 <th>Статус</th>
@@ -26,39 +23,31 @@
             {% for app in applications %}
             <tr>
                 <td>#{{ app.id }}</td>
-                <td>Вакансия #{{ app.vacancy_id }}</td>
                 <td>{{ app.student_name }}</td>
                 <td>{{ app.student_email }}</td>
                 <td>
-                    <span class="badge 
-                        {% if app.status == 'pending' %}job
-                        {% elif app.status == 'accepted' %}internship
-                        {% else %}job{% endif %}">
-                        {% if app.status == 'pending' %}⏳ Ожидает
-                        {% elif app.status == 'accepted' %}✅ Принята
-                        {% else %}❌ Отклонена{% endif %}
-                    </span>
+                    {% if app.status == 'pending' %}
+                        <span class="badge job">⏳ Ожидает</span>
+                    {% elif app.status == 'accepted' %}
+                        <span class="badge internship">✅ Принята</span>
+                    {% else %}
+                        <span class="badge job">❌ Отклонена</span>
+                    {% endif %}
                 </td>
                 <td>
                     {% if app.status == 'pending' %}
                     <form method="post" style="display: inline;">
                         <input type="hidden" name="app_id" value="{{ app.id }}">
                         <input type="hidden" name="action" value="accept">
-                        <button type="submit" class="btn btn-success" style="padding: 8px 15px;">
-                            <i class="fas fa-check"></i> Принять
-                        </button>
+                        <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;">Принять</button>
                     </form>
                     <form method="post" style="display: inline;">
                         <input type="hidden" name="app_id" value="{{ app.id }}">
                         <input type="hidden" name="action" value="reject">
-                        <button type="submit" class="btn btn-danger" style="padding: 8px 15px;">
-                            <i class="fas fa-times"></i> Отклонить
-                        </button>
+                        <button class="btn-outline" style="padding: 6px 12px; font-size: 12px;">Отклонить</button>
                     </form>
-                    {% else %}
-                    <a href="/chat/{{ app.id }}" class="btn btn-primary" style="padding: 8px 15px;">
-                        <i class="fas fa-comments"></i> Чат
-                    </a>
+                    {% elif app.status == 'accepted' %}
+                    <a href="/chat/{{ app.id }}" class="btn-primary" style="padding: 6px 12px; font-size: 12px;">Чат</a>
                     {% endif %}
                 </td>
             </tr>
@@ -66,7 +55,7 @@
         </tbody>
     </table>
     {% else %}
-    <p style="text-align: center; padding: 50px;">📭 Нет заявок для обработки</p>
+    <p style="text-align: center; padding: 40px;">Нет заявок для обработки</p>
     {% endif %}
 </div>
 {% endblock %}
