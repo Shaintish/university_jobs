@@ -189,9 +189,7 @@ def get_all_applications():
 def update_application_status(app_id, status):
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute('''
-        UPDATE applications SET status = ? WHERE id = ?
-    ''', (status, app_id))
+    cursor.execute("UPDATE applications SET status = ? WHERE id = ?", (status, app_id))
     conn.commit()
     conn.close()
 
