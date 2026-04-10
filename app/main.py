@@ -2,8 +2,8 @@ from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse, RedirectResponse
 from typing import Optional, List
-from .schemas import Vacancy, VacancyCreate, Application, ApplicationCreate, UserCreate, UserLogin
-from .services import JobService, UserService, vacancies_db, applications_db
+from .schemas import Vacancy, VacancyCreate, Application, ApplicationCreate, UserCreate
+from .services import JobService, UserService
 import uuid
 
 app = FastAPI(title="University Career Hub")
@@ -125,23 +125,26 @@ async def create_vacancy(
         JobService.create_vacancy(vacancy_data)
         return templates.TemplateResponse(
             "add_vacancy.html",
-            {"request": request, "message": "✅ Вакансия успешно создана!", "user": None}
+            {"request": request, "message": "✅ Вакансия успешно создана!"}
         )
     except Exception as e:
         return templates.TemplateResponse(
             "add_vacancy.html",
-            {"request": request, "error": str(e), "user": None}
+            {"request": request, "error": str(e)}
         )
 
 @app.get("/apply/{vacancy_id}", response_class=HTMLResponse)
 async def apply_form(request: Request, vacancy_id: int):
     try:
         vacancy = JobService.get_vacancy(vacancy_id)
+        if not vacancy:
+            return RedirectResponse(url="/", status_code=303)
         return templates.TemplateResponse(
             "apply.html",
             {"request": request, "vacancy": vacancy}
         )
-    except HTTPException:
+    except Exception as e:
+        print(f"Ошибка в apply_form: {e}")
         return RedirectResponse(url="/", status_code=303)
 
 @app.post("/apply/{vacancy_id}")
@@ -175,6 +178,15 @@ async def submit_application(
                 "error": str(e)
             }
         )
+    except Exception as e:
+        return templates.TemplateResponse(
+            "apply.html",
+            {
+                "request": request, 
+                "vacancy": JobService.get_vacancy(vacancy_id),
+                "error": str(e)
+            }
+        )
 
 # ========== API ЭНДПОИНТЫ ==========
 
@@ -185,17 +197,6 @@ async def create_vacancy_api(vacancy: VacancyCreate):
 @app.get("/vacancies", response_model=List[Vacancy])
 async def get_vacancies_api(search: Optional[str] = None):
     return JobService.get_all_vacancies(search)
-
-@app.get("/vacancies/all", response_model=dict)
-async def get_all_vacancies_debug():
-    return {
-        "total": len(vacancies_db),
-        "vacancies": vacancies_db
-    }
-
-@app.get("/applications/all", response_model=List[Application])
-async def get_all_applications_debug():
-    return applications_db
 
 @app.get("/vacancies/{vacancy_id}", response_model=Vacancy)
 async def get_vacancy_api(vacancy_id: int):
