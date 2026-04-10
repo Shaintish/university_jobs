@@ -1,22 +1,61 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="vacancies-grid">
-    {% if vacancies %}
+<!-- Герой секция -->
+<div class="hero">
+    <h1>Найди работу или стажировку своей мечты</h1>
+    <p>CareerHub — платформа, где студенты находят возможности для развития, а работодатели — талантливых кандидатов</p>
+</div>
+
+<!-- Статистика -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-number">{{ vacancies|length }}</div>
+        <div class="stat-label">Актуальных вакансий</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">250+</div>
+        <div class="stat-label">Студентов уже нашли работу</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-number">50+</div>
+        <div class="stat-label">Компаний-партнеров</div>
+    </div>
+</div>
+
+{% if vacancies %}
+    <div class="vacancies-grid">
         {% for vacancy in vacancies %}
         <div class="vacancy-card">
-            <h3>{{ vacancy.title }}</h3>
-            <p>{{ vacancy.description[:100] }}{% if vacancy.description|length > 100 %}...{% endif %}</p>
-            <p><strong>Отдел:</strong> {{ vacancy.department }}</p>
-            <span class="badge {{ vacancy.job_type }}">{{ vacancy.job_type }}</span>
-            {% if vacancy.salary %}
-            <p><strong>💰 {{ vacancy.salary }} $</strong></p>
-            {% endif %}
-            <a href="/apply/{{ vacancy.id }}" class="btn">📝 Подать заявку</a>
+            <div class="vacancy-tag">
+                <span class="badge {{ vacancy.job_type }}">
+                    {% if vacancy.job_type == 'job' %}Полная занятость{% else %}Стажировка{% endif %}
+                </span>
+            </div>
+            <h3 class="vacancy-title">{{ vacancy.title }}</h3>
+            <div class="vacancy-department">
+                <i class="fas fa-building"></i> {{ vacancy.department }}
+            </div>
+            <p class="vacancy-description">{{ vacancy.description[:120] }}{% if vacancy.description|length > 120 %}...{% endif %}</p>
+            <div class="vacancy-meta">
+                <div class="salary">
+                    {% if vacancy.salary %}
+                        {{ vacancy.salary }} ₽ <small>в месяц</small>
+                    {% else %}
+                        Зарплата по договоренности
+                    {% endif %}
+                </div>
+                <a href="/apply/{{ vacancy.id }}" class="btn-apply">Откликнуться →</a>
+            </div>
         </div>
         {% endfor %}
-    {% else %}
-        <p style="text-align: center; color: white; font-size: 1.2em;">Пока нет вакансий</p>
-    {% endif %}
-</div>
+    </div>
+{% else %}
+    <div style="text-align: center; padding: 60px; background: white; border-radius: 20px;">
+        <i class="fas fa-briefcase" style="font-size: 48px; color: #ccc;"></i>
+        <h3 style="margin-top: 16px;">Пока нет вакансий</h3>
+        <p style="color: #666; margin: 8px 0 24px;">Будьте первым, кто создаст вакансию!</p>
+        <a href="/add-vacancy" class="btn-primary">Создать вакансию</a>
+    </div>
+{% endif %}
 {% endblock %}
