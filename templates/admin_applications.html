@@ -2,52 +2,56 @@
 
 {% block content %}
 <div class="table-container">
-    <h2 style="margin-bottom: 24px;">Управление заявками</h2>
+    <h2>👔 Управление заявками</h2>
     
     {% if message %}
     <div class="alert success">{{ message }}</div>
     {% endif %}
     
-    {% if applications %}
-    <table>
+    {% if applications and applications|length > 0 %}
+    <table style="width: 100%; border-collapse: collapse;">
         <thead>
-            <tr>
-                <th>ID</th>
-                <th>Студент</th>
-                <th>Email</th>
-                <th>Статус</th>
-                <th>Действия</th>
+            <tr style="background: #1a1a2e; color: white;">
+                <th style="padding: 10px;">ID</th>
+                <th style="padding: 10px;">Вакансия</th>
+                <th style="padding: 10px;">Студент</th>
+                <th style="padding: 10px;">Email</th>
+                <th style="padding: 10px;">Статус</th>
+                <th style="padding: 10px;">Действия</th>
             </tr>
         </thead>
         <tbody>
-            {% for app in applications %}
-            <tr>
-                <td>#{{ app.id }}</td>
-                <td>{{ app.student_name }}</td>
-                <td>{{ app.student_email }}</td>
-                <td>
-                    {% if app.status == 'pending' %}
-                        <span class="badge job">⏳ Ожидает</span>
-                    {% elif app.status == 'accepted' %}
-                        <span class="badge internship">✅ Принята</span>
+            {% for application in applications %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 10px;">#{{ application.id }}</td>
+                <td style="padding: 10px;">Вакансия #{{ application.vacancy_id }}</td>
+                <td style="padding: 10px;">{{ application.student_name }}</td>
+                <td style="padding: 10px;">{{ application.student_email }}</td>
+                <td style="padding: 10px;">
+                    {% if application.status == 'pending' %}
+                        <span style="background: #ffc107; padding: 3px 8px; border-radius: 5px;">⏳ Ожидает</span>
+                    {% elif application.status == 'accepted' %}
+                        <span style="background: #28a745; color: white; padding: 3px 8px; border-radius: 5px;">✅ Принята</span>
                     {% else %}
-                        <span class="badge job">❌ Отклонена</span>
+                        <span style="background: #dc3545; color: white; padding: 3px 8px; border-radius: 5px;">❌ Отклонена</span>
                     {% endif %}
                 </td>
-                <td>
-                    {% if app.status == 'pending' %}
+                <td style="padding: 10px;">
+                    {% if application.status == 'pending' %}
                     <form method="post" style="display: inline;">
-                        <input type="hidden" name="app_id" value="{{ app.id }}">
+                        <input type="hidden" name="app_id" value="{{ application.id }}">
                         <input type="hidden" name="action" value="accept">
-                        <button class="btn-primary" style="padding: 6px 12px; font-size: 12px;">Принять</button>
+                        <button type="submit" style="background: #28a745; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">✅ Принять</button>
                     </form>
                     <form method="post" style="display: inline;">
-                        <input type="hidden" name="app_id" value="{{ app.id }}">
+                        <input type="hidden" name="app_id" value="{{ application.id }}">
                         <input type="hidden" name="action" value="reject">
-                        <button class="btn-outline" style="padding: 6px 12px; font-size: 12px;">Отклонить</button>
+                        <button type="submit" style="background: #dc3545; color: white; border: none; padding: 5px 10px; border-radius: 5px; cursor: pointer;">❌ Отклонить</button>
                     </form>
-                    {% elif app.status == 'accepted' %}
-                    <a href="/chat/{{ app.id }}" class="btn-primary" style="padding: 6px 12px; font-size: 12px;">Чат</a>
+                    {% elif application.status == 'accepted' %}
+                    <a href="/chat/{{ application.id }}" style="background: #007bff; color: white; padding: 5px 10px; border-radius: 5px; text-decoration: none;">💬 Чат</a>
+                    {% else %}
+                    <span style="color: #666;">Обработана</span>
                     {% endif %}
                 </td>
             </tr>
@@ -55,7 +59,7 @@
         </tbody>
     </table>
     {% else %}
-    <p style="text-align: center; padding: 40px;">Нет заявок для обработки</p>
+    <p style="text-align: center; padding: 40px;">📭 Нет заявок для обработки</p>
     {% endif %}
 </div>
 {% endblock %}
