@@ -122,9 +122,9 @@ def save_vacancy(title, description, department, job_type, salary, employer_id=N
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO vacancies (title, description, department, job_type, salary, employer_id)
-        VALUES (?, ?, ?, ?, ?, ?)
-    ''', (title, description, department, job_type, salary, employer_id))
+        INSERT INTO vacancies (title, description, department, job_type, salary)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (title, description, department, job_type, salary))
     conn.commit()
     vacancy_id = cursor.lastrowid
     conn.close()

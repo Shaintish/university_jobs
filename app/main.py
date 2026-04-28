@@ -171,6 +171,7 @@ async def create_vacancy(
             {"request": request, "message": "✅ Вакансия успешно создана!"}
         )
     except Exception as e:
+        print(f"Ошибка: {e}")  # Добавьте эту строку для отладки
         return templates.TemplateResponse(
             "add_vacancy.html",
             {"request": request, "error": str(e)}

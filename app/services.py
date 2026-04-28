@@ -28,7 +28,7 @@ class JobService:
         return get_all_vacancies(search)
 
     @staticmethod
-    def get_vacancy(vacancy_id: int):  # ← ЭТОТ МЕТОД НУЖНО ДОБАВИТЬ
+    def get_vacancy(vacancy_id: int):
         vacancy = get_vacancy(vacancy_id)
         if not vacancy:
             raise HTTPException(status_code=404, detail="Вакансия не найдена")
@@ -100,12 +100,14 @@ class JobService:
     def get_messages_by_application(application_id: int):
         return get_messages_by_application(application_id)
 
+
 class UserService:
     @staticmethod
     def register(data: UserCreate):
         existing = get_user_by_username(data.username)
         if existing:
             raise HTTPException(status_code=400, detail="Пользователь уже существует")
+        
         existing_email = get_user_by_email(data.email)
         if existing_email:
             raise HTTPException(status_code=400, detail="Email уже используется")
@@ -121,9 +123,3 @@ class UserService:
         if user["password"] != password:
             raise HTTPException(status_code=401, detail="Неверный пароль")
         return user
-    @staticmethod
-    def get_vacancy(vacancy_id: int):
-        vacancy = get_vacancy(vacancy_id)
-        if not vacancy:
-            raise HTTPException(status_code=404, detail="Вакансия не найдена")
-        return vacancy
