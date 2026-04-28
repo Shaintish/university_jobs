@@ -1,9 +1,11 @@
 from fastapi import FastAPI, Request, Form, HTTPException
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from typing import Optional, List
 from .schemas import Vacancy, VacancyCreate, Application, ApplicationCreate, UserCreate
 from .services import JobService, UserService
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 import uuid
 
 app = FastAPI(title="University Career Hub")
@@ -11,6 +13,47 @@ templates = Jinja2Templates(directory="templates")
 
 # Хранилище сессий (в памяти)
 sessions = {}
+
+# ========== ОБРАБОТЧИКИ ОШИБОК ВАЛИДАЦИИ ==========
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    """Детализированная обработка ошибок валидации"""
+    errors = []
+    for error in exc.errors():
+        # Извлекаем название поля
+        if len(error["loc"]) > 1:
+            field = ".".join(str(loc) for loc in error["loc"][1:])
+        else:
+            field = error["loc"][-1]
+        
+        errors.append({
+            "field": field,
+            "error": error["msg"],
+            "type": error["type"]
+        })
+    
+    return JSONResponse(
+        status_code=422,
+        content={
+            "success": False,
+            "error": "Ошибка валидации данных",
+            "details": errors,
+            "message": "Пожалуйста, проверьте правильность заполнения полей"
+        }
+    )
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request, exc):
+    """Детализированная обработка HTTP ошибок"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": exc.detail,
+            "status_code": exc.status_code
+        }
+    )
 
 # ========== СТРАНИЦЫ САЙТА ==========
 
@@ -87,7 +130,7 @@ async def my_applications(request: Request):
         return RedirectResponse(url="/login", status_code=303)
     
     current_user = sessions[session_id]
-    user_applications = JobService.get_applications_by_email(current_user.email)
+    user_applications = JobService.get_applications_by_email(current_user["email"])
     
     return templates.TemplateResponse(
         "my_applications.html",
@@ -116,9 +159,9 @@ async def create_vacancy(
 ):
     try:
         vacancy_data = VacancyCreate(
-            title=title,
-            description=description,
-            department=department,
+            title=title.strip(),
+            description=description.strip(),
+            department=department.strip(),
             job_type=job_type,
             salary=salary
         )
@@ -157,7 +200,7 @@ async def submit_application(
     try:
         application_data = ApplicationCreate(
             vacancy_id=vacancy_id,
-            student_name=student_name,
+            student_name=student_name.strip(),
             student_email=student_email
         )
         JobService.create_application(application_data)
@@ -167,15 +210,6 @@ async def submit_application(
                 "request": request, 
                 "vacancy": JobService.get_vacancy(vacancy_id),
                 "message": "✅ Заявка успешно отправлена!"
-            }
-        )
-    except Exception as e:
-        return templates.TemplateResponse(
-            "apply.html",
-            {
-                "request": request, 
-                "vacancy": JobService.get_vacancy(vacancy_id),
-                "error": str(e)
             }
         )
     except Exception as e:
@@ -209,6 +243,16 @@ async def create_application_api(application: ApplicationCreate):
 @app.get("/applications/{app_id}", response_model=Application)
 async def get_application_api(app_id: int):
     return JobService.get_application(app_id)
+
+# ========== ОТЛАДОЧНЫЕ ЭНДПОИНТЫ ==========
+
+@app.get("/vacancies/all")
+async def get_all_vacancies_debug():
+    return JobService.get_all_vacancies()
+
+@app.get("/applications/all")
+async def get_all_applications_debug():
+    return JobService.get_all_applications()
 
 # ========== ВХОД ДЛЯ РАБОТОДАТЕЛЯ ==========
 
@@ -298,6 +342,7 @@ async def admin_update_application(
         "admin_applications.html",
         {"request": request, "applications": all_applications, "user": current_user, "message": message}
     )
+
 # ========== ЧАТ ==========
 
 @app.get("/chat/{application_id}", response_class=HTMLResponse)
@@ -365,7 +410,7 @@ async def my_chats(request: Request):
         active_chats = []
         for chat in all_chats:
             app = JobService.get_application(chat["application_id"])
-            if app and app.status == "accepted":
+            if app and app["status"] == "accepted":
                 active_chats.append(chat)
     else:
         active_chats = JobService.get_chats_by_student_email(current_user.get("email"))
